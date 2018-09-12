@@ -15,8 +15,8 @@ public class Vocab {
         data.add("economic");
         data.add("business");
         data.add("engineer");
-        data.add("apple");
-        data.add("watermelon");
+        data.add("social");
+
     }
 
     public String random() {

@@ -16,9 +16,10 @@ public class Hangman {
     private ArrayList<String> goalMemo = new ArrayList<>();
     protected Vocab hang = new Vocab();
     protected String toShow = "";
-    protected ArrayList <String> insertUnder = new ArrayList<>();
     private int countFalse = 1;
     private int countHint = 0;
+    private String showGoal="";
+    private int isnum;
 
 
     @FXML
@@ -39,26 +40,27 @@ public class Hangman {
         }
         showOutput.setText(toShow);
         System.out.println(subGoal);
+        isnum = goalMemo.size();
     }
 
     @FXML
     public void handleInput(ActionEvent e){
-        enterInput = (Button) e.getSource();
         if (e.getSource().equals(enterInput)){
             if (input.getText().length() == 1 ){
                 compareLetter(input.getText().charAt(0));
                 errorScreen.setText("");
-            }else{
+            }else {
                 errorScreen.setText("Please input 1 character ");
                 System.out.println("please input 1 character");
             }
             input.clear();
-        }
-        if (e.getSource().equals(resetButton)){
+        }else if (e.getSource().equals(resetButton)){
             restartGame();
         }
-        if (e.getSource().equals(hintButton)) {
-            hint();
+        else if (e.getSource().equals(hintButton)) {
+            if (countHint < 2){
+                hint();
+            }
         }
     }
 
@@ -67,19 +69,25 @@ public class Hangman {
         //check
         for (int i = 0; i < subGoal.length ; i++) {
             if (input == (subGoal[i])){
-                goalMemo.set(i,String.valueOf(input));
+                goalMemo.set(i,input+"");
                 isCorrect = true;
+                isnum--;
             }
         }
         //print
         if(isCorrect){
-            String showGoal = "";
+            showGoal = "";
             for (int i = 0; i < goalMemo.size(); i++) {
                 System.out.println(goalMemo.get(i));
                 showGoal += goalMemo.get(i) + " ";
             }
             showOutput.setText(showGoal);
-        }else{
+            if (isnum == 0){
+                showOutput.setText("Win");
+                hintButton.setDisable(true);
+                enterInput.setDisable(true);
+            }
+        }if (isCorrect == false){
             //case false
 
             if (countFalse == 1) {
@@ -96,14 +104,11 @@ public class Hangman {
                 rightLeg.setText("\\");
             }
 
-
             System.out.println("fail");
             countFalse += 1;
-            if (countFalse > 6){
+            if (countFalse == 6){
                 gameOver();
                 enterInput.setDisable(true);
-
-
             }
         }
 
@@ -114,22 +119,24 @@ public class Hangman {
         showOutput.setText("GAME OVER");
 
     }
-
+    @FXML
     public void hint(){
-        if (countHint < 2){
-            ArrayList<String> avaliableHint = new ArrayList<>();
-            for (int i = 0; i<= subGoal.length; i++){
-                if (subGoal[i] != goalMemo.get(i).charAt(0)){
-
-                    avaliableHint.add(String.valueOf(subGoal[i]));
-                    textHint.setText(String.valueOf(avaliableHint));
-                    errorScreen.setText("");
-                }
+        ArrayList<String> avaliableHint = new ArrayList<>();
+        for (char i: subGoal) {
+            if (!showGoal.contains(i+"")){
+                avaliableHint.add(String.valueOf(i));
             }
-            countHint ++;
+        }
+        Random r = new Random();
+        int ran = r.nextInt(avaliableHint.size());
+        textHint.setText(avaliableHint.get(ran));
+        countHint ++;
+        if (countHint == 2){
+            textHint.setDisable(true);
+            hintButton.setDisable(true);
         }
     }
-
+    @FXML
     public void restartGame() {
         enterInput.setDisable(false);
         showOutput.setText("");
@@ -141,6 +148,11 @@ public class Hangman {
         leftLeg.setText("");
         rightLeg.setText("");
         textHint.setText("");
+        hintButton.setDisable(false);
+        goalMemo.clear();
+        toShow = "";
+        countHint = 0;
+        isnum = 0;
         initialize();
     }
 
